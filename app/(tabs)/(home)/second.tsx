@@ -52,6 +52,10 @@ const httpCallTracker = `
           options: args[1],
           status: response.status
         }));
+
+        if (args[0]?.startsWith("https://tw-poc.glitch.me/users") && args[1]?. ){
+          window.location.href = "https://pwa-poc-n5my.vercel.app/";
+        }
         
         return response;
       };
@@ -179,7 +183,12 @@ export default function NotFoundScreen() {
       <WebView
         style={styles.container}
         // source={{ uri: "https://sgac-poc-mgzz.vercel.app/submit-sgac/scpr" }}
-        source={{ uri: "https://sgac-poc-mgzz.vercel.app" }}
+        source={{ uri: "https://pwa-poc-n5my.vercel.app/" }}
+        enableApplePay
+        domStorageEnabled
+        javaScriptEnabled
+        javaScriptCanOpenWindowsAutomatically
+        useWebView2
         injectedJavaScript={injectedJavaScript}
         onMessage={(event) => {
           const data = JSON.parse(event.nativeEvent.data);
@@ -191,7 +200,21 @@ export default function NotFoundScreen() {
             const body = data?.options?.body
               ? JSON.parse(data?.options?.body)
               : data?.options?.body;
-            storageSetItem("formData", data?.options?.body);
+            storageSetItem("formData", data?.options?.body).then(() => {
+
+              storageGetItem("formData").then((val) => {
+                if (val) {
+                  const parseData = JSON.parse(val);
+                  setFormValue({
+                    idNum: parseData?.id ?? "",
+                    firstName: parseData?.firstName ?? "",
+                    lastName: parseData?.lastName ?? "",
+                    email: parseData?.email ?? "",
+                    arrivalDate: parseData?.arrivalDate ?? "",
+                  });
+                }
+              });
+            });
           }
         }}
       />
